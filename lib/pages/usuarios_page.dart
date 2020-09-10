@@ -1,4 +1,6 @@
+import 'package:chat_app/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'package:chat_app/models/usuario.dart';
@@ -13,18 +15,21 @@ class _UsuariosPageState extends State<UsuariosPage> {
       RefreshController(initialRefresh: false);
 
   final usuarios = [
-    Usuario(uid: '1', nombre: 'Pedro', email: 'test1@test.com', online: true),
-    Usuario(uid: '2', nombre: 'Juan', email: 'test2@test.com', online: false),
-    Usuario(uid: '1', nombre: 'Sancho', email: 'test3@test.com', online: true),
+    Usuario(uid: '1', name: 'Pedro', email: 'test1@test.com', online: true),
+    Usuario(uid: '2', name: 'Juan', email: 'test2@test.com', online: false),
+    Usuario(uid: '1', name: 'Sancho', email: 'test3@test.com', online: true),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+    final usuario = authService.usuario;
+
     return Scaffold(
       appBar: AppBar(
         title: Center(
           child: Text(
-            'Nombre',
+            usuario.name,
             style: TextStyle(color: Colors.black87),
           ),
         ),
@@ -35,7 +40,11 @@ class _UsuariosPageState extends State<UsuariosPage> {
             Icons.exit_to_app,
             color: Colors.black87,
           ),
-          onPressed: () {},
+          onPressed: () {
+            //TODO: desconectar el soket
+            Navigator.pushReplacementNamed(context, 'login');
+            AuthService.deleteToken();
+          },
         ),
         actions: <Widget>[
           Container(
@@ -100,9 +109,9 @@ class UsuarioListTile extends StatelessWidget {
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: Colors.blue[100],
-        child: Text(usuario.nombre.substring(0, 2)),
+        child: Text(usuario.name.substring(0, 2)),
       ),
-      title: Text(usuario.nombre),
+      title: Text(usuario.name),
       subtitle: Text(usuario.email),
       trailing: Container(
         width: 10,

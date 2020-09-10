@@ -1,8 +1,13 @@
+import 'package:chat_app/helpers/mostrar_alerta.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:chat_app/services/auth_service.dart';
+
 import 'package:chat_app/widgets/button_blue.dart';
 import 'package:chat_app/widgets/custom_input.dart';
 import 'package:chat_app/widgets/labels.dart';
 import 'package:chat_app/widgets/logo.dart';
-import 'package:flutter/material.dart';
 
 class RegisterPage extends StatelessWidget {
   @override
@@ -54,9 +59,9 @@ class __FormState extends State<_Form> {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passController = TextEditingController();
-  final confirmPassController = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
     return Container(
       margin: EdgeInsets.only(top: 40),
       padding: EdgeInsets.symmetric(horizontal: 50),
@@ -80,20 +85,29 @@ class __FormState extends State<_Form> {
             textController: passController,
             isPassword: true,
           ),
-          CustomInput(
-            icon: Icons.lock_outline,
-            placeholder: 'Confirmar password',
-            textController: confirmPassController,
-            isPassword: true,
-          ),
           ButtonBlue(
             text: 'Registrar',
-            onPressed: () {
-              print(nameController.text);
-              print(emailController.text);
-              print(passController.text);
-              print(confirmPassController.text);
-            },
+            onPressed: authService.autenticando
+                ? null
+                : () async {
+                    FocusScope.of(context).unfocus();
+                    final loginOk = await authService.register(
+                      nameController.text.trim(),
+                      emailController.text.trim(),
+                      passController.text.trim(),
+                    );
+                    if (loginOk == true) {
+                      // TODO: Conectar socket
+                      Navigator.pushReplacementNamed(context, 'usuarios');
+                    } else {
+                      // Mostrar alerta
+                      mostrarAlerta(
+                        context,
+                        'Registro incorrecto',
+                        loginOk,
+                      );
+                    }
+                  },
           ),
         ],
       ),
